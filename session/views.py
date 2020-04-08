@@ -21,7 +21,7 @@ class CreateSession(APIView):
         N = 7
         user = request.user
         # Use lowercase variables in python
-        sessionToken = ''.join(random.choices(string.ascii_uppercase + string.digits, k=N))
+        sessionToken = ''.join(random.choices(string.ascii_lowercase + string.digits, k=N))
         session = Session.objects.create(name=sessionName, secret_code=sessionToken, created_by=user.id)
 
         member = Membership.objects.create(person=user, session=session)

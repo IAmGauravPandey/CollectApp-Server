@@ -1,6 +1,8 @@
 from random import randint
 
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import User
+
 from django.http import JsonResponse
 from rest_framework import permissions
 from rest_framework.authentication import TokenAuthentication
@@ -8,7 +10,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 
 from authapp.constants import *
-from authapp.models import *
+from authapp.models import Profile
 
 
 class Register(APIView):
@@ -19,13 +21,14 @@ class Register(APIView):
     permission_classes = (permissions.AllowAny,)
     authentication_classes = (TokenAuthentication,)
 
-    def _create_user(self, user, password):
+    def _create_user(self, user, password, name):
         otp = randint(1000, 9999)
         otp = 1234
         user.set_password(password)
         user.save()
         p = Profile.objects.get(user=user)
         p.otp = str(otp)
+        p.name=str(name)
         p.save()
         Token.objects.get_or_create(user=user)
         return JsonResponse({
@@ -38,18 +41,18 @@ class Register(APIView):
         name = data['name']
         phone = data['phone']
         password = data['password']
-        if User.objects.get_by_natural_key(username=phone).exists():
+        if User.objects.filter(username=phone).exists():
             user = User.objects.get(username=phone)
             if user.is_active:
                 return JsonResponse({
                     'success': False,
                     'message': USER_EXISTS_MESSAGE
                 })
-            return self._create_user(user, password)
+            return self._create_user(user, password, name)
         user = User.objects.create_user(username=phone, password=password)
         user.is_active = False
         user.save()
-        return self._create_user(user, password)
+        return self._create_user(user, password, name)
 
 
 class VerifyAccount(APIView):
@@ -79,7 +82,10 @@ class VerifyAccount(APIView):
                 'access_token': token.key
             })
         else:
-            return WRONG_OTP_RESPONSE
+            return JsonResponse({
+                'success':False,
+                'message':WRONG_OTP_MESSAGE
+            })
 
 
 class Login(APIView):
