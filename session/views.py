@@ -20,7 +20,7 @@ class CreateSession(APIView):
         sessionName = data['sessionName']
         N = 7
         user = request.user
-        # Use lowercase variables in python
+        
         sessionToken = ''.join(random.choices(string.ascii_lowercase + string.digits, k=N))
         session = Session.objects.create(name=sessionName, secret_code=sessionToken, created_by=user.id)
 
@@ -72,8 +72,15 @@ class SessionList(APIView):
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, *args, **kwargs):
+        userr=request.user
+        user_membership=list(Membership.objects.filter(person=userr).values())
+        session_set={0}
+        for temp in user_membership:
+            session_set.add(temp['session_id'])
+        session_set.remove(0)
         session_list = []
-        for session in Session.objects.all():
+        for i in session_set:
+            session=Session.objects.get(id=i)
             user = User.objects.get(id=session.created_by)
             profile = Profile.objects.get(user=user)
             session_list.append({
