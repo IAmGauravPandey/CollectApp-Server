@@ -19,3 +19,7 @@ class Transaction(models.Model):
 
     def __str__(self):
         return self.group.name
+
+    def sessionName(self):
+        group=self.group
+        return group.session

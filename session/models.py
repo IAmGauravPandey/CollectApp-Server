@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from authapp.models import Profile
 
 
 class Session(models.Model):
@@ -21,11 +22,12 @@ class Membership(models.Model):
 
     def __str__(self):
         return self.session.name
-        # TODO: it should return person's name
+        
+    def sessionName(self):
+        return self.session.name
+    
+    def personName(self):
+        person_profile=Profile.objects.get(user=self.person)
+        return person_profile.name
 
-'''
-TODO: create models Chat, Transaction, TransactionGroup
-Implement  push notification type feature for new chat message such that 
-is notified to all members using WebSockets
-'''
 
