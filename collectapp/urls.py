@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('authapp.urls')),
     path('session/',include('session.urls')),
+    path('transaction/',include('transaction.urls')),
 ]
